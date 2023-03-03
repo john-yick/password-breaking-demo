@@ -1,2 +1,11 @@
-# password-breaking-demo
-A small demo using breadth first search to show how insure short passwords are
+# Password breaking demo
+
+A quick demo to show how short passwords are insecure
+
+# How to use
+
+## Install dependencies
+npm install
+
+## Run the demo
+npm run dev
