@@ -115,8 +115,8 @@ export default {
             }
         }
 
-        await new Promise(r => setTimeout(r, 100 * counter)); //so we dont pin the CPU to 100% and fake how longer passwords take longer to crack
-        counter*counter;
+        await new Promise(r => setTimeout(r, 10 * counter)); //so we dont pin the CPU to 100% and fake how longer passwords take longer to crack
+        counter++;
       }
     },
     async start() {
