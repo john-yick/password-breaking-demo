@@ -8,7 +8,7 @@
           your password here</p>
         <div v-if="!isCracking && elapsedTime === 0" class="mx-auto mt-10 flex max-w-md gap-x-4">
           <label class="sr-only">Password</label>
-          <input v-model="knownPassword" v-on:keyup.enter="start()" maxlength="5"
+          <input v-model="knownPassword" v-on:keyup.enter="start()" :maxlength="maxPasswordLength"
             class="min-w-0 flex-auto rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-white sm:text-sm sm:leading-6"
             placeholder="Enter your password to test" />
           <button @click="start()"
@@ -40,7 +40,6 @@
 </template>
 
 <script>
-import { isGloballyWhitelisted } from '@vue/shared';
 
 
 export default {
@@ -53,18 +52,19 @@ export default {
       knownPassword: '',
       // charset: "0123456789",
       // charset: "abcdefghijklmnopqrstuvwxyz",
-      charset: "abcdefghijklmnopqrstuvwxyz0123456789",
+      // charset: "abcdefghijklmnopqrstuvwxyz0123456789",
       // charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
       // charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-      // charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789[\]^_`{|} !\"#$%&'()*+,-./:;<=>?@~",
+      charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789[\]^_`{|} !\"#$%&'()*+,-./:;<=>?@~",
 
+      maxPasswordLength: 100,
       passwordsChecked: 0,
       isCracking: false,
       elapsedTime: 0
     };
   },
   methods: {
-    bruteForce() {
+    async bruteForce() {
       const nodes = [];
       const lastChar = this.charset[this.charset.length - 1];
 
@@ -88,6 +88,7 @@ export default {
             }
           }
 
+          await new Promise(r => setTimeout(r, 1));
         }
         else {
           nodes.pop();
@@ -100,6 +101,24 @@ export default {
         }
       }
     },
+    async fake(){
+      //Demo mode, to illustrate how long it would take if using a GPU cluster
+      let guess = '';
+      let c = ''
+      let counter = 1;
+      while(guess !== this.knownPassword) {
+        for(var i = 0; i < this.charset.length; i++) {
+            c = this.charset.charAt(i);
+            if (c === this.knownPassword.charAt(guess.length)) {
+                guess += c;
+                break;
+            }
+        }
+
+        await new Promise(r => setTimeout(r, 100 * counter)); //so we dont pin the CPU to 100% and fake how longer passwords take longer to crack
+        counter*counter;
+      }
+    },
     async start() {
 
       this.isCracking = true
@@ -107,10 +126,15 @@ export default {
 
       console.log('start')
       const start = Date.now();
-      this.bruteForce();
+
+      //Used to fake a demo of how long it would take to crack a password
+      await this.fake();
+
+      //Used to actually crack the password
+      // await this.bruteForce();
 
       this.isCracking = false
-      this.elapsedTime = (Date.now() - start) / 100
+      this.elapsedTime = (Date.now() - start) / 1000
       console.log(`${this.elapsedTime} seconds to crack your password!`);
     }
   }
