@@ -17,7 +17,7 @@
         </div>
         <div v-else-if="isCracking && elapsedTime === 0" class="text-align">
           <img class="m-auto" src="../assets/robot.gif" height="200" width="200">
-          <p>Dum.... Dummm Dummm</p>
+          <p>Dum.... Dummm Dummm - Checking all passwords of length {{ counter }}</p>
         </div>
         <div v-else class="text-align">
           <img class="m-auto" src="../assets/finished.gif" height="200" width="200">
@@ -60,7 +60,9 @@ export default {
       maxPasswordLength: 100,
       passwordsChecked: 0,
       isCracking: false,
-      elapsedTime: 0
+      elapsedTime: 0,
+
+      counter: 1
     };
   },
   methods: {
@@ -101,22 +103,23 @@ export default {
         }
       }
     },
-    async fake(){
+    async fake() {
       //Demo mode, to illustrate how long it would take if using a GPU cluster
       let guess = '';
       let c = ''
-      let counter = 1;
-      while(guess !== this.knownPassword) {
-        for(var i = 0; i < this.charset.length; i++) {
-            c = this.charset.charAt(i);
-            if (c === this.knownPassword.charAt(guess.length)) {
-                guess += c;
-                break;
-            }
+      while (guess !== this.knownPassword) {
+        for (var i = 0; i < this.charset.length; i++) {
+          c = this.charset.charAt(i);
+          if (c === this.knownPassword.charAt(guess.length)) {
+            guess += c;
+            break;
+          }
         }
 
-        await new Promise(r => setTimeout(r, 10 * counter)); //so we dont pin the CPU to 100% and fake how longer passwords take longer to crack
-        counter++;
+        // Make the wait exponential to fake how long it would take to crack a password
+        await new Promise(r => setTimeout(r, 10 * this.counter * this.counter));
+
+        this.counter++;
       }
     },
     async start() {
